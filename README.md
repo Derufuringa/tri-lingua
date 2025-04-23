@@ -31,10 +31,10 @@ const result = await TriLingua(
 
 Parameters :
 
-- model : LanguageModel instance from AI SDK
-- language : Target language (ISO 639-1 code or full name)
-- prompt : Source text to translate
-  Response Object :
+- **model** : LanguageModel instance from AI SDK
+- **language** : Target language (ISO 639-1 code or full name)
+- **prompt** : Source text to translate
+- **Response** Object :
 
 ```typescript
 interface TriLinguaResponse {

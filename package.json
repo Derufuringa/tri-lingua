@@ -1,7 +1,7 @@
 {
   "name": "@derufuringa/tri-lingua",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "三界镜写",
   "author": {
     "email": "admin@rikka.cc",
@@ -9,10 +9,10 @@
     "url": "https://github.com/Muromi-Rikka"
   },
   "license": "MIT",
-  "homepage": "https://github.com/Derufuringa/tri-lingua ",
+  "homepage": "https://github.com/Derufuringa/tri-lingua",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Derufuringa/tri-lingua .git"
+    "url": "git+https://github.com/Derufuringa/tri-lingua.git"
   },
   "bugs": {
     "url": "https://github.com/Derufuringa/tri-lingua/issues"
