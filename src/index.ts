@@ -1,6 +1,5 @@
 import type { LanguageModel } from "ai";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { generateText } from "ai";
 import { DreamseerGaze } from "./prompt/DreamseerGaze";
 import { FinalizeTransmutation } from "./prompt/FinalizeTransmutation";
 import { SigilWheelProcess } from "./prompt/SigilWheelProcess";
@@ -17,7 +16,7 @@ export interface TriLinguaResponse {
   /**
    * An array of strings that lists the issues found in the first pass of the translation process, identified by the SigilWheelProcess.
    */
-  issues: Array<string>;
+  issues: string;
   /**
    * The final optimized translation result, produced by the FinalizeTransmutation process.
    */
@@ -39,45 +38,29 @@ export interface TriLinguaResponse {
 export async function TriLingua(model: LanguageModel, language: string, prompt: string): Promise<TriLinguaResponse> {
   // 三步翻译法中的第一步：执行 DreamseerGaze 流程，获取初步翻译结果。
   // 调用 generateObject 函数，传入模型、返回数据的模式、系统提示信息和用户输入的提示信息。
-  const dreamseerGazeResult = await generateObject({
+  const dreamseerGazeResult = await generateText({
     model,
-    schema: z.object({
-      result: z.string(),
-    }),
-    system: DreamseerGaze(language),
-    prompt,
+    prompt: DreamseerGaze(language, prompt),
   });
   // 三步翻译法中的第二步：执行 SigilWheelProcess 流程，检查初步翻译结果中存在的问题。
   // 调用 generateObject 函数，传入模型、返回数据的模式、系统提示信息和由用户输入原文及直接翻译结果组成的提示信息。
-  const sigilWheelProcessResult = await generateObject({
+  const sigilWheelProcessResult = await generateText({
     model,
-    schema: z.object({
-      issues: z.array(z.string()),
-    }),
-    system: SigilWheelProcess(language),
-    prompt: [
-      `用户输入原文：${prompt}`,
-      `直接翻译结果: ${dreamseerGazeResult.object.result}`,
-    ].join("\n\n"),
+    prompt: SigilWheelProcess(language, prompt, dreamseerGazeResult.text),
   });
 
   // 三步翻译法中的第三步：执行 FinalizeTransmutation 流程，根据前两步的结果进行最终的翻译优化。
   // 调用 generateObject 函数，传入模型、返回数据的模式、系统提示信息和包含前两步结果的提示信息
-  const finalizeTransmutationResult = await generateObject({
+  const finalizeTransmutationResult = await generateText({
     model,
-    schema: z.object({
-      result: z.string(),
-    }),
-    system: FinalizeTransmutation(language),
-    prompt: [
-      `直接翻译版本: ${dreamseerGazeResult.object.result}`,
-      `第一次翻译的问题清单: ${sigilWheelProcessResult.object.issues.join(";")}`,
-    ].join("\n\n"),
+
+    prompt: FinalizeTransmutation(language, dreamseerGazeResult.text, sigilWheelProcessResult.text),
+
   });
 
   return {
-    first_pass: dreamseerGazeResult.object.result,
-    issues: sigilWheelProcessResult.object.issues,
-    result: finalizeTransmutationResult.object.result,
+    first_pass: dreamseerGazeResult.text,
+    issues: sigilWheelProcessResult.text,
+    result: finalizeTransmutationResult.text,
   };
 }
